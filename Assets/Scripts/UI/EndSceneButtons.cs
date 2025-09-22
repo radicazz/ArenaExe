@@ -1,11 +1,11 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class MainMenuButtons : MonoBehaviour
+public class EndSceneButtons : MonoBehaviour
 {
-    public void StartGame()
+    public void RestartGame()
     {
-        Debug.Log("Loading the game scene...");
+        Debug.Log("Restarting the game...");
         SceneManager.LoadScene("Game Scene");
     }
 
@@ -15,4 +15,3 @@ public class MainMenuButtons : MonoBehaviour
         Application.Quit();
     }
 }
-
