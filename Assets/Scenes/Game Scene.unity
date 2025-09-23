@@ -144,7 +144,7 @@ Transform:
   m_GameObject: {fileID: 271122082}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.7, z: -21.1}
+  m_LocalPosition: {x: 0, y: 1.24, z: -21.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -302,15 +302,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2fe9e3ce6229ff44bfe0d55afa5ca08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _followOffset: {x: 0, y: 0, z: -300}
+  _followOffset: {x: 0, y: 0, z: -600}
   _forwardOffsetWhenClose: 0
-  _minPitchDegrees: 12.6
-  _maxPitchDegrees: 60.3
-  _pitchSmoothTime: 0.35
-  _yawSmoothTime: 0.35
-  _minOrthographicSize: 10
-  _maxOrthographicSize: 50
-  _distanceForMaxZoom: 500
+  _minPitchDegrees: 40
+  _maxPitchDegrees: 45
+  _pitchSmoothTime: 0.4
+  _yawSmoothTime: 0.4
+  _minOrthographicSize: 15
+  _maxOrthographicSize: 30
+  _distanceForMaxZoom: 50
   _zoomSmoothTime: 0.35
   _flyInDuration: 3
   _flyInCurve:
@@ -319,8 +319,8 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 0
-      outSlope: 0
+      inSlope: 2
+      outSlope: 2
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
@@ -328,8 +328,8 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 1
       value: 1
-      inSlope: 2
-      outSlope: 2
+      inSlope: 0
+      outSlope: 0
       tangentMode: 0
       weightedMode: 0
       inWeight: 0

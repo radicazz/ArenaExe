@@ -3,21 +3,17 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     Rigidbody _rigidbody;
-
-    [SerializeField]
-    float _moveSpeed = 5f;
+    Animator _animator;
 
     Vector2 _movementInput;
 
-    CameraController _camera;
-
-    Animator _animator;
+    [SerializeField]
+    float _moveSpeed = 5f;
 
     void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
         _animator = GetComponentInChildren<Animator>();
-        _camera = FindFirstObjectByType<CameraController>();
         _movementInput = Vector2.zero;
     }
 
@@ -49,7 +45,7 @@ public class PlayerController : MonoBehaviour
     {
         if (_movementInput.magnitude > 0)
         {
-            Vector3 movement = _camera.GetRight() * _movementInput.x + _camera.GetForward() * _movementInput.y;
+            Vector3 movement = transform.right * _movementInput.x + transform.forward * _movementInput.y;
             if (movement != Vector3.zero)
             {
                 movement.Normalize();
