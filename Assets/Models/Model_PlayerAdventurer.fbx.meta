@@ -147,7 +147,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Player Idle
+      name: AdventurerIdle
       takeName: CharacterArmature|Idle
       internalID: 9061338213343248790
       firstFrame: 0
@@ -495,7 +495,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Player Run
+      name: AdventurerRun
       takeName: CharacterArmature|Run
       internalID: 1395189703230314720
       firstFrame: 0

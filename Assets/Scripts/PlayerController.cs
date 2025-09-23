@@ -9,20 +9,16 @@ public class PlayerController : MonoBehaviour
 
     Vector2 _movementInput;
 
-    Camera _mainCamera;
+    CameraController _camera;
 
     Animator _animator;
 
     void Awake()
     {
-        _mainCamera = Camera.main;
-        _movementInput = Vector2.zero;
-    }
-
-    void Start()
-    {
         _rigidbody = GetComponent<Rigidbody>();
         _animator = GetComponentInChildren<Animator>();
+        _camera = FindFirstObjectByType<CameraController>();
+        _movementInput = Vector2.zero;
     }
 
     void Update()
@@ -53,15 +49,7 @@ public class PlayerController : MonoBehaviour
     {
         if (_movementInput.magnitude > 0)
         {
-            Vector3 forward = _mainCamera.transform.forward;
-            forward.y = 0;
-            forward.Normalize();
-
-            Vector3 right = _mainCamera.transform.right;
-            right.y = 0;
-            right.Normalize();
-
-            Vector3 movement = right * _movementInput.x + forward * _movementInput.y;
+            Vector3 movement = _camera.GetRight() * _movementInput.x + _camera.GetForward() * _movementInput.y;
             if (movement != Vector3.zero)
             {
                 movement.Normalize();
