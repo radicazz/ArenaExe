@@ -11,10 +11,18 @@ public class PlayerController : MonoBehaviour
 
     Camera _mainCamera;
 
+    Animator _animator;
+
     void Awake()
     {
-        _rigidbody = GetComponent<Rigidbody>();
         _mainCamera = Camera.main;
+        _movementInput = Vector2.zero;
+    }
+
+    void Start()
+    {
+        _rigidbody = GetComponent<Rigidbody>();
+        _animator = GetComponentInChildren<Animator>();
     }
 
     void Update()
@@ -43,19 +51,33 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        Vector3 forward = _mainCamera.transform.forward;
-        forward.y = 0;
-        forward.Normalize();
-
-        Vector3 right = _mainCamera.transform.right;
-        right.y = 0;
-        right.Normalize();
-
-        Vector3 movement = right * _movementInput.x + forward * _movementInput.y;
-        if (movement != Vector3.zero)
+        if (_movementInput.magnitude > 0)
         {
-            movement.Normalize();
+            Vector3 forward = _mainCamera.transform.forward;
+            forward.y = 0;
+            forward.Normalize();
+
+            Vector3 right = _mainCamera.transform.right;
+            right.y = 0;
+            right.Normalize();
+
+            Vector3 movement = right * _movementInput.x + forward * _movementInput.y;
+            if (movement != Vector3.zero)
+            {
+                movement.Normalize();
+            }
+            _rigidbody.linearVelocity = movement * _moveSpeed;
+
+            _animator.SetInteger("move", 1);
+            Debug.Log("Set move to 1");
         }
-        _rigidbody.linearVelocity = movement * _moveSpeed;
+        else
+        {
+            _rigidbody.linearVelocity = Vector3.zero;
+            _movementInput = Vector2.zero;
+
+            _animator.SetInteger("move", 0);
+            Debug.Log("Set move to 0");
+        }
     }
 }
