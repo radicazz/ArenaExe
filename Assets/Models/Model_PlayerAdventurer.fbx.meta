@@ -31,7 +31,7 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: CharacterArmature|Death
+      name: AdventurerDeath
       takeName: CharacterArmature|Death
       internalID: 4447012609936615250
       firstFrame: 0
@@ -60,7 +60,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: CharacterArmature|Gun_Shoot
+      name: AdventurerShoot
       takeName: CharacterArmature|Gun_Shoot
       internalID: -6766124179129801036
       firstFrame: 0
@@ -71,8 +71,8 @@ ModelImporter:
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 0
-      loopBlend: 0
+      loopTime: 1
+      loopBlend: 1
       loopBlendOrientation: 0
       loopBlendPositionY: 0
       loopBlendPositionXZ: 0
@@ -89,7 +89,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: CharacterArmature|HitRecieve
+      name: AdventurererHitRecieve
       takeName: CharacterArmature|HitRecieve
       internalID: -7655272897581899170
       firstFrame: 0
@@ -466,7 +466,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: CharacterArmature|Roll
+      name: AdventurerRoll
       takeName: CharacterArmature|Roll
       internalID: -7580519143377161132
       firstFrame: 0
@@ -611,7 +611,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: CharacterArmature|Run_Shoot
+      name: AdventurerRunShoot
       takeName: CharacterArmature|Run_Shoot
       internalID: 6461627435052548778
       firstFrame: 0
@@ -622,8 +622,8 @@ ModelImporter:
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 0
-      loopBlend: 0
+      loopTime: 1
+      loopBlend: 1
       loopBlendOrientation: 0
       loopBlendPositionY: 0
       loopBlendPositionXZ: 0

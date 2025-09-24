@@ -7,6 +7,7 @@ TagManager:
   - Arena
   - Player 1
   - Player 2
+  - Pickup Health
   layers:
   - Default
   - TransparentFX

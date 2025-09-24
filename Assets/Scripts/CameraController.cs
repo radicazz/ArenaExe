@@ -10,8 +10,6 @@ public class CameraController : MonoBehaviour
     [SerializeField, Min(0f)] float _forwardOffsetWhenClose = 5f;
 
     [Header("Rotation")]
-    [SerializeField, Range(-89f, 89f)] float _minPitchDegrees = 25f;
-    [SerializeField, Range(-89f, 89f)] float _maxPitchDegrees = 45f;
     [SerializeField, Min(0.01f)] float _pitchSmoothTime = 0.35f;
     [SerializeField, Min(0.01f)] float _yawSmoothTime = 0.35f;
 
@@ -71,17 +69,18 @@ public class CameraController : MonoBehaviour
 
         Vector3 focusPoint = CalculateFocusPoint(out float planarSeparation);
         float desiredSize = CalculateDesiredSize(planarSeparation, out float distanceFactor);
-        float desiredPitch = CalculateDesiredPitch(distanceFactor);
-        Quaternion initialTargetRotation = Quaternion.Euler(desiredPitch, _initialYaw, _initialRoll);
+        float desiredYaw = CalculateDesiredYaw(focusPoint);
+        Quaternion yawRotation = Quaternion.Euler(0f, desiredYaw, 0f);
+        Vector3 desiredPosition = CalculateDesiredPosition(focusPoint, yawRotation, distanceFactor);
+        Quaternion desiredRotation = CalculateTargetRotation(focusPoint, desiredPosition, desiredYaw, out float desiredPitch);
 
         if (!_flyInComplete)
         {
-            Vector3 targetPosition = CalculateDesiredPosition(focusPoint, initialTargetRotation, distanceFactor);
-            ProcessFlyIn(targetPosition, desiredSize, initialTargetRotation);
+            ProcessFlyIn(desiredPosition, desiredSize, desiredRotation);
         }
         else
         {
-            FollowTargets(focusPoint, desiredSize, desiredPitch);
+            FollowTargets(desiredPosition, desiredSize, desiredPitch, desiredYaw);
         }
     }
 
@@ -115,34 +114,52 @@ public class CameraController : MonoBehaviour
         }
     }
 
-    void FollowTargets(Vector3 focusPoint, float desiredSize, float desiredPitch)
+    void FollowTargets(Vector3 desiredPosition, float desiredSize, float desiredPitch, float desiredYaw)
     {
+        _staticPosition = desiredPosition;
         transform.position = _staticPosition;
 
-        Vector3 planarToFocus = new Vector3(focusPoint.x - _staticPosition.x, 0f, focusPoint.z - _staticPosition.z);
-        float targetYaw = planarToFocus.sqrMagnitude <= Mathf.Epsilon
-            ? transform.eulerAngles.y
-            : Mathf.Atan2(planarToFocus.x, planarToFocus.z) * Mathf.Rad2Deg;
-
-        float currentYaw = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetYaw, ref _yawVelocity, _yawSmoothTime);
+        float currentYaw = Mathf.SmoothDampAngle(transform.eulerAngles.y, desiredYaw, ref _yawVelocity, _yawSmoothTime);
         float currentPitch = Mathf.SmoothDampAngle(transform.eulerAngles.x, desiredPitch, ref _pitchVelocity, _pitchSmoothTime);
         transform.rotation = Quaternion.Euler(currentPitch, currentYaw, _initialRoll);
 
         _camera.orthographicSize = Mathf.SmoothDamp(_camera.orthographicSize, desiredSize, ref _zoomVelocity, _zoomSmoothTime);
     }
 
-    Vector3 CalculateDesiredPosition(Vector3 focusPoint, Quaternion rotation, float distanceFactor)
+    Vector3 CalculateDesiredPosition(Vector3 focusPoint, Quaternion yawRotation, float distanceFactor)
     {
         float forwardOffset = Mathf.Lerp(_forwardOffsetWhenClose, 0f, distanceFactor);
         Vector3 localOffset = _followOffset + Vector3.forward * forwardOffset;
-        return focusPoint + rotation * localOffset;
+        return focusPoint + yawRotation * localOffset;
     }
 
-    float CalculateDesiredPitch(float distanceFactor)
+    float CalculateDesiredYaw(Vector3 focusPoint)
     {
-        float minPitch = Mathf.Min(_minPitchDegrees, _maxPitchDegrees);
-        float maxPitch = Mathf.Max(_minPitchDegrees, _maxPitchDegrees);
-        return Mathf.Lerp(maxPitch, minPitch, distanceFactor);
+        Vector3 referencePosition = _flyInComplete ? _staticPosition : transform.position;
+        Vector3 planarToFocus = new Vector3(focusPoint.x - referencePosition.x, 0f, focusPoint.z - referencePosition.z);
+
+        if (planarToFocus.sqrMagnitude <= Mathf.Epsilon)
+        {
+            return transform.eulerAngles.y;
+        }
+
+        return Mathf.Atan2(planarToFocus.x, planarToFocus.z) * Mathf.Rad2Deg;
+    }
+
+    Quaternion CalculateTargetRotation(Vector3 focusPoint, Vector3 desiredPosition, float desiredYaw, out float desiredPitch)
+    {
+        Vector3 toFocus = focusPoint - desiredPosition;
+        if (toFocus.sqrMagnitude <= Mathf.Epsilon)
+        {
+            desiredPitch = transform.eulerAngles.x;
+            return Quaternion.Euler(desiredPitch, desiredYaw, _initialRoll);
+        }
+
+        Quaternion inverseYaw = Quaternion.Euler(0f, -desiredYaw, 0f);
+        Vector3 localToFocus = inverseYaw * toFocus;
+        float forwardMagnitude = Mathf.Sqrt(localToFocus.z * localToFocus.z + localToFocus.x * localToFocus.x);
+        desiredPitch = -Mathf.Atan2(localToFocus.y, forwardMagnitude) * Mathf.Rad2Deg;
+        return Quaternion.Euler(desiredPitch, desiredYaw, _initialRoll);
     }
 
     Vector3 CalculateFocusPoint(out float planarSeparation)

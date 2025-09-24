@@ -31,7 +31,7 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: CharacterArmature|Death
+      name: SoldierDeath
       takeName: CharacterArmature|Death
       internalID: 4447012609936615250
       firstFrame: 0
@@ -89,7 +89,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: CharacterArmature|HitRecieve
+      name: SoldierHitRecieve
       takeName: CharacterArmature|HitRecieve
       internalID: -7655272897581899170
       firstFrame: 0
@@ -495,7 +495,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Soldier Run
+      name: SoldierRun
       takeName: CharacterArmature|Run
       internalID: 1395189703230314720
       firstFrame: 0
