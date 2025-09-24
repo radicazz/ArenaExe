@@ -14,4 +14,10 @@ public class EndSceneButtons : MonoBehaviour
         Debug.Log("Quiting the game...");
         Application.Quit();
     }
+
+    public void GoToStart()
+    {
+        Debug.Log("Going to Start Scene...");
+        SceneManager.LoadSceneAsync("Start Scene");
+    }
 }
