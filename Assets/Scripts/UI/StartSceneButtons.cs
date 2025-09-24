@@ -12,7 +12,7 @@ public class StartSceneButtons : MonoBehaviour
     public void HowToPlay()
     {
         Debug.Log("Loading the How To Play scene...");
-        SceneManager.LoadScene("How To Play");
+        SceneManager.LoadScene("How To Play Scene");
     }
 
     public void QuitGame()
