@@ -277,7 +277,7 @@ GameObject:
   - component: {fileID: 54520409}
   - component: {fileID: 54520408}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: Controls
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -299,7 +299,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -16}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &54520408
@@ -322,7 +322,18 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '- Use WASD and the arrow keys to control player 1 and player 2 '
+  m_text: "- Use WASD to control player 1\n- Use the arrow keys to control player
+    2\n- Press 'F' to shoot player 1's weapon\n- Press 'K' to fire player 2's weapon\n-
+    Each player can take 5 hits before being knocked down, if a player is knocked
+    down it is up to the other player to survive until the other player respawns.
+    If both players are knocked down the game ends. \n- Throughout the game pickups
+    will spawn these pickups will either be health or weapons. Picking up a health
+    pickup will restore one bar of health to the player character. Weapons which
+    the player can pick up are more powerful than the starter pistol however come
+    at the cost of having limited ammunition. \n- The goal of the game is to survive
+    as long as you can against increasingly more difficult odds, the longer a player
+    survives the harder the waves becoming. Waves of enemies becoming much larger
+    allowing for more vvariety in enemy type.      "
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4b775fd2e279fd04a962470b83154b52, type: 2}
   m_sharedMaterial: {fileID: -7489765113027175155, guid: 4b775fd2e279fd04a962470b83154b52, type: 2}
@@ -331,8 +342,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4279893760
+  m_fontColor: {r: 0, g: 1, b: 0.09961438, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -820,7 +831,7 @@ GameObject:
   - component: {fileID: 718789050}
   - component: {fileID: 718789049}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: Title
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
