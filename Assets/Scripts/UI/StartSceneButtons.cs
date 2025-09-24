@@ -14,5 +14,11 @@ public class StartSceneButtons : MonoBehaviour
         Debug.Log("Quiting the game...");
         Application.Quit();
     }
+
+    public void HowToPlay()
+    {
+        Debug.Log("Loading the How To Play scene...");
+        SceneManager.LoadScene("Controls Scene");
+    }
 }
 
