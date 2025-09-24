@@ -1,6 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameState : MonoBehaviour
 {
@@ -8,7 +11,8 @@ public class GameState : MonoBehaviour
     {
         Intro,
         Preparation,
-        Combat
+        Combat,
+        GameOver
     }
 
     public sealed class PlayerStats
@@ -54,12 +58,19 @@ public class GameState : MonoBehaviour
     public event Action<int> WaveStarted;
     public event Action<int> WaveCompleted;
     [SerializeField, Min(1)] int _startingWave = 1;
+    [SerializeField, Min(0f)] float _endSceneDelay = 3f;
+    [Header("Fade")]
+    [SerializeField] Image _fadeImage;
+    [SerializeField, Min(0.01f)] float _fadeDuration = 1.5f;
 
     readonly List<PlayerController> _players = new();
     readonly Dictionary<PlayerController, PlayerStats> _playerStats = new();
 
     GamePhase _currentPhase = GamePhase.Intro;
     int _currentWave;
+    bool _gameEnded;
+    Coroutine _endSceneRoutine;
+    Coroutine _fadeRoutine;
 
     public GamePhase CurrentPhase => _currentPhase;
     public int CurrentWave => _currentWave;
@@ -90,6 +101,7 @@ public class GameState : MonoBehaviour
 
         _currentWave = Mathf.Max(1, _startingWave);
         RefreshPlayers();
+        InitializeFadeImage();
     }
 
     void Start()
@@ -97,8 +109,33 @@ public class GameState : MonoBehaviour
         SetPhase(GamePhase.Intro);
     }
 
+    void Update()
+    {
+        if (_gameEnded)
+        {
+            return;
+        }
+
+        if (AreAllPlayersDead())
+        {
+            EndGame();
+        }
+    }
+
     void OnDestroy()
     {
+        if (_endSceneRoutine != null)
+        {
+            StopCoroutine(_endSceneRoutine);
+            _endSceneRoutine = null;
+        }
+
+        if (_fadeRoutine != null)
+        {
+            StopCoroutine(_fadeRoutine);
+            _fadeRoutine = null;
+        }
+
         if (Instance == this)
         {
             Instance = null;
@@ -107,12 +144,17 @@ public class GameState : MonoBehaviour
 
     public void BeginIntroPhase()
     {
+        if (_gameEnded)
+        {
+            return;
+        }
+
         SetPhase(GamePhase.Intro);
     }
 
     public void BeginCombatPhase()
     {
-        if (_currentPhase == GamePhase.Combat)
+        if (_gameEnded || _currentPhase == GamePhase.Combat)
         {
             return;
         }
@@ -130,7 +172,7 @@ public class GameState : MonoBehaviour
 
     public void BeginPreparationPhase()
     {
-        if (_currentPhase == GamePhase.Preparation)
+        if (_gameEnded || _currentPhase == GamePhase.Preparation)
         {
             return;
         }
@@ -220,6 +262,125 @@ public class GameState : MonoBehaviour
         Debug.Log($"[GameState] Phase change: {previousPhase} -> {_currentPhase}.", this);
         PhaseChanged?.Invoke(_currentPhase);
     }
+
+    void InitializeFadeImage()
+    {
+        if (_fadeImage == null)
+        {
+            return;
+        }
+
+        Color color = _fadeImage.color;
+        color.a = (_currentPhase == GamePhase.GameOver) ? 1f : 0f;
+        _fadeImage.color = color;
+        _fadeImage.raycastTarget = true;
+    }
+
+    bool AreAllPlayersDead()
+    {
+        bool anyPlayerFound = false;
+
+        foreach (PlayerController player in _players)
+        {
+            if (player == null)
+            {
+                continue;
+            }
+
+            anyPlayerFound = true;
+
+            if (player.IsAlive)
+            {
+                return false;
+            }
+        }
+
+        return anyPlayerFound;
+    }
+
+    void EndGame()
+    {
+        if (_gameEnded)
+        {
+            return;
+        }
+
+        _gameEnded = true;
+        SetPhase(GamePhase.GameOver);
+        Debug.Log("[GameState] All players are dead. Game over.", this);
+
+        TriggerFadeToBlack();
+
+        if (!gameObject.activeInHierarchy)
+        {
+            SceneManager.LoadScene("End Scene");
+            return;
+        }
+
+        _endSceneRoutine = StartCoroutine(LoadEndSceneAfterDelay());
+    }
+
+    void TriggerFadeToBlack()
+    {
+        if (_fadeImage == null)
+        {
+            return;
+        }
+
+        if (!gameObject.activeInHierarchy)
+        {
+            Color immediateColor = _fadeImage.color;
+            immediateColor.a = 1f;
+            _fadeImage.color = immediateColor;
+            return;
+        }
+
+        if (_fadeRoutine != null)
+        {
+            StopCoroutine(_fadeRoutine);
+        }
+
+        _fadeRoutine = StartCoroutine(FadeToBlack());
+    }
+
+    IEnumerator FadeToBlack()
+    {
+        if (_fadeImage == null)
+        {
+            yield break;
+        }
+
+        float elapsed = 0f;
+        Color startColor = _fadeImage.color;
+        Color targetColor = startColor;
+        targetColor.a = 1f;
+
+        if (_fadeDuration <= Mathf.Epsilon)
+        {
+            _fadeImage.color = targetColor;
+            _fadeRoutine = null;
+            yield break;
+        }
+
+        while (elapsed < _fadeDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / _fadeDuration);
+            _fadeImage.color = Color.Lerp(startColor, targetColor, t);
+            yield return null;
+        }
+
+        _fadeImage.color = targetColor;
+        _fadeRoutine = null;
+    }
+
+    IEnumerator LoadEndSceneAfterDelay()
+    {
+        if (_endSceneDelay > 0f)
+        {
+            yield return new WaitForSeconds(_endSceneDelay);
+        }
+
+        SceneManager.LoadScene("End Scene");
+    }
 }
-
-

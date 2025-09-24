@@ -381,7 +381,7 @@ MonoBehaviour:
   - {fileID: 2079746780}
   - {fileID: 928051191}
   - {fileID: 937782186}
-  _baseEnemiesPerWave: 2
+  _baseEnemiesPerWave: 3
   _enemyGrowthPerWave: 1
   _spawnSpreadSeconds: 0.35
 --- !u!114 &69093819
@@ -396,7 +396,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e11d4ce1386e9034c8a7acc819e0d86b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _startingWave: 1
+  _startingWave: 10
+  _endSceneDelay: 2
+  _fadeImage: {fileID: 1298008239}
+  _fadeDuration: 2
 --- !u!1001 &78798587
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1388,6 +1391,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1298008238}
   - {fileID: 571256090}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

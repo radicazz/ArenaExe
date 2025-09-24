@@ -6,7 +6,7 @@ public class EndSceneButtons : MonoBehaviour
     public void RestartGame()
     {
         Debug.Log("Restarting the game...");
-        SceneManager.LoadScene("Game Scene");
+        SceneManager.LoadSceneAsync("Game Scene");
     }
 
     public void QuitGame()

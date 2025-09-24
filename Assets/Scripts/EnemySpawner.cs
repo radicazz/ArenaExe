@@ -110,15 +110,10 @@ public class EnemySpawner : MonoBehaviour
             return;
         }
 
-        GameObject enemyInstance = Instantiate(_rangedEnemyPrefab, spawnPoint.position, spawnPoint.rotation);
-        Debug.Log($"[EnemySpawner] Spawned ranged enemy at {spawnPoint.name} for wave {_currentWave}.", this);
-        EnemyRangedController rangedEnemy = enemyInstance.GetComponent<EnemyRangedController>();
-        if (rangedEnemy != null)
-        {
-            rangedEnemy.Initialize(_currentWave);
-        }
-
+        Instantiate(_rangedEnemyPrefab, spawnPoint.position, spawnPoint.rotation);
         _queuedSpawns--;
+
+        Debug.Log($"[EnemySpawner] Spawned ranged enemy at {spawnPoint.name} for wave {_currentWave}.", this);
     }
 }
 
