@@ -12,6 +12,7 @@ public class GameState : MonoBehaviour
         Intro,
         Preparation,
         Combat,
+        Paused,
         GameOver
     }
 
@@ -62,6 +63,9 @@ public class GameState : MonoBehaviour
     [Header("Fade")]
     [SerializeField] Image _fadeImage;
     [SerializeField, Min(0.01f)] float _fadeDuration = 1.5f;
+    [Header("Pause")]
+    [SerializeField] GameObject _pausePanel;
+    [SerializeField] GameObject _hudPanel;
 
     readonly List<PlayerController> _players = new();
     readonly Dictionary<PlayerController, PlayerStats> _playerStats = new();
@@ -71,8 +75,10 @@ public class GameState : MonoBehaviour
     bool _gameEnded;
     Coroutine _endSceneRoutine;
     Coroutine _fadeRoutine;
+    GamePhase _phaseBeforePause = GamePhase.Intro;
 
     public GamePhase CurrentPhase => _currentPhase;
+    public bool IsPaused => _currentPhase == GamePhase.Paused;
     public int CurrentWave => _currentWave;
     public IReadOnlyList<PlayerController> Players => _players;
     public IEnumerable<PlayerStats> PlayerStatistics => _playerStats.Values;
@@ -100,8 +106,10 @@ public class GameState : MonoBehaviour
         }
 
         _currentWave = Mathf.Max(1, _startingWave);
+        Time.timeScale = 1f;
         RefreshPlayers();
         InitializeFadeImage();
+        InitializePausePanel();
     }
 
     void Start()
@@ -111,7 +119,12 @@ public class GameState : MonoBehaviour
 
     void Update()
     {
-        if (_gameEnded)
+        if (!_gameEnded && Input.GetKeyDown(KeyCode.Escape))
+        {
+            TogglePause();
+        }
+
+        if (_gameEnded || _currentPhase == GamePhase.Paused)
         {
             return;
         }
@@ -136,6 +149,7 @@ public class GameState : MonoBehaviour
             _fadeRoutine = null;
         }
 
+        Time.timeScale = 1f;
         if (Instance == this)
         {
             Instance = null;
@@ -169,6 +183,45 @@ public class GameState : MonoBehaviour
         WaveStarted?.Invoke(_currentWave);
         _enemySpawner?.SpawnWave(_currentWave);
     }
+
+    public void TogglePause()
+    {
+        if (_gameEnded)
+        {
+            return;
+        }
+
+        if (_currentPhase == GamePhase.Paused)
+        {
+            ResumeFromPause();
+        }
+        else
+        {
+            PauseGame();
+        }
+    }
+
+    void PauseGame()
+    {
+        if (_currentPhase == GamePhase.GameOver || _currentPhase == GamePhase.Paused)
+        {
+            return;
+        }
+
+        _phaseBeforePause = _currentPhase;
+        SetPhase(GamePhase.Paused);
+    }
+
+    void ResumeFromPause()
+    {
+        if (_currentPhase != GamePhase.Paused)
+        {
+            return;
+        }
+
+        SetPhase(_phaseBeforePause);
+    }
+
 
     public void BeginPreparationPhase()
     {
@@ -259,8 +312,53 @@ public class GameState : MonoBehaviour
 
         GamePhase previousPhase = _currentPhase;
         _currentPhase = newPhase;
+        ApplyPhaseSideEffects(previousPhase, _currentPhase);
         Debug.Log($"[GameState] Phase change: {previousPhase} -> {_currentPhase}.", this);
         PhaseChanged?.Invoke(_currentPhase);
+    }
+
+    void ApplyPhaseSideEffects(GamePhase previousPhase, GamePhase newPhase)
+    {
+        if (newPhase == GamePhase.Paused)
+        {
+            Time.timeScale = 0f;
+            SetPausePanelVisible(true);
+            SetHudVisible(false);
+            return;
+        }
+
+        if (previousPhase == GamePhase.Paused)
+        {
+            Time.timeScale = 1f;
+            SetPausePanelVisible(false);
+            SetHudVisible(true);
+        }
+    }
+
+    void InitializePausePanel()
+    {
+        SetPausePanelVisible(false);
+        SetHudVisible(true);
+    }
+
+    void SetPausePanelVisible(bool visible)
+    {
+        if (_pausePanel == null)
+        {
+            return;
+        }
+
+        _pausePanel.SetActive(visible);
+    }
+
+    void SetHudVisible(bool visible)
+    {
+        if (_hudPanel == null)
+        {
+            return;
+        }
+
+        _hudPanel.SetActive(visible);
     }
 
     void InitializeFadeImage()
