@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2334358416332263650
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3894170639655376169}
+  m_Layer: 0
+  m_Name: Muzzle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3894170639655376169
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2334358416332263650}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.05, y: 1.615, z: 0.495}
+  m_LocalScale: {x: 0.6666667, y: 0.6666667, z: 0.6666667}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7756892902642561298}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5565599195827850520
 GameObject:
   m_ObjectHideFlags: 0
@@ -149,12 +180,13 @@ Transform:
   m_GameObject: {fileID: 7872804415394120386}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -25.25927, y: 0.90310764, z: 1.5092659}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 2478571583788832962}
   - {fileID: 4089247982946286907}
+  - {fileID: 3894170639655376169}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &1834858858548543973
@@ -224,6 +256,15 @@ MonoBehaviour:
   _currentHealth: 100
   _spotLight: {fileID: 5169896378605813951}
   _turnSpeedDegreesPerSecond: 540
+  _barrel: {fileID: 3894170639655376169}
+  _projectilePrefab: {fileID: 3310915183252703991, guid: 8cf4de7b551356347a7520ea80b660b2, type: 3}
+  _fireRange: 20
+  _fireCooldown: 0.35
+  _maxAmmo: 12
+  _startingAmmo: 12
+  _fireLineOfSightMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1001 &2733437327285239593
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -20,9 +20,20 @@ public class PlayerController : MonoBehaviour
     [Header("Orientation")]
     [SerializeField, Min(0f)] float _turnSpeedDegreesPerSecond = 540f;
 
+    [Header("Weapon")]
+    [SerializeField] Transform _barrel;
+    [SerializeField] GameObject _projectilePrefab;
+    [SerializeField, Min(0f)] float _fireRange = 20f;
+    [SerializeField, Min(0.05f)] float _fireCooldown = 0.35f;
+    [SerializeField, Min(0)] int _maxAmmo = 12;
+    [SerializeField, Min(0)] int _startingAmmo = 12;
+    [SerializeField] LayerMask _fireLineOfSightMask = ~0;
+
     Transform _closestEnemy;
     float _enemyRefreshTimer;
     Quaternion _movementFrame;
+    int _currentAmmo;
+    float _fireTimer;
 
     public float CurrentHealth => _currentHealth;
     public float MaxHealth => _maxHealth;
@@ -37,6 +48,14 @@ public class PlayerController : MonoBehaviour
 
         _movementInput = Vector2.zero;
         _currentHealth = Mathf.Clamp(_currentHealth, 0f, _maxHealth);
+        _maxAmmo = Mathf.Max(0, _maxAmmo);
+        _startingAmmo = Mathf.Max(0, _startingAmmo);
+        if (_maxAmmo > 0)
+        {
+            _startingAmmo = Mathf.Min(_startingAmmo, _maxAmmo);
+        }
+        _currentAmmo = _startingAmmo;
+        _fireTimer = 0f;
 
         Vector3 planarForward = transform.forward;
         planarForward.y = 0f;
@@ -105,6 +124,7 @@ public class PlayerController : MonoBehaviour
         }
 
         UpdateFacing();
+        HandleFiring(phase == GameStateController.GamePhase.Combat);
     }
 
     void FixedUpdate()
@@ -196,6 +216,110 @@ public class PlayerController : MonoBehaviour
     void AddHealth(float amount)
     {
         _currentHealth = Mathf.Clamp(_currentHealth + amount, 0f, _maxHealth);
+    }
+
+    void HandleFiring(bool canFire)
+    {
+        _fireTimer = Mathf.Max(0f, _fireTimer - Time.deltaTime);
+
+        if (!canFire || _projectilePrefab == null || _barrel == null)
+        {
+            return;
+        }
+
+        if (_fireTimer > 0f)
+        {
+            return;
+        }
+
+        if (!GetFireInput())
+        {
+            return;
+        }
+
+        if (_currentAmmo <= 0)
+        {
+            Debug.Log("[PlayerController] Out of ammo.", this);
+            return;
+        }
+
+        Transform target = _closestEnemy != null && _closestEnemy.gameObject.activeInHierarchy ? _closestEnemy : FindClosestEnemy();
+        if (target == null)
+        {
+            return;
+        }
+
+        Vector3 targetPosition = target.position + Vector3.up * 0.4f;
+        Vector3 toTarget = targetPosition - transform.position;
+        if (toTarget.sqrMagnitude > _fireRange * _fireRange)
+        {
+            return;
+        }
+
+        if (!HasLineOfSight(target, targetPosition))
+        {
+            return;
+        }
+
+        FireProjectile(targetPosition);
+    }
+
+    bool GetFireInput()
+    {
+        if (CompareTag("Player 1"))
+        {
+            return Input.GetKeyDown(KeyCode.Space);
+        }
+
+        if (CompareTag("Player 2"))
+        {
+            return Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.RightControl);
+        }
+
+        return Input.GetKeyDown(KeyCode.Space);
+    }
+
+    bool HasLineOfSight(Transform target, Vector3 targetPosition)
+    {
+        if (_barrel == null)
+        {
+            return true;
+        }
+
+        Vector3 origin = _barrel.position;
+        Vector3 direction = targetPosition - origin;
+        float distance = direction.magnitude;
+        if (distance <= Mathf.Epsilon)
+        {
+            return true;
+        }
+
+        direction /= distance;
+        if (Physics.Raycast(origin, direction, out RaycastHit hit, distance, _fireLineOfSightMask, QueryTriggerInteraction.Ignore))
+        {
+            if (hit.collider != null && target != null && hit.collider.transform.IsChildOf(target))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    void FireProjectile(Vector3 targetPosition)
+    {
+        Vector3 direction = targetPosition - _barrel.position;
+        if (direction.sqrMagnitude <= Mathf.Epsilon)
+        {
+            direction = transform.forward;
+        }
+
+        Quaternion rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
+        Instantiate(_projectilePrefab, _barrel.position, rotation);
+        _currentAmmo = Mathf.Max(0, _currentAmmo - 1);
+        _fireTimer = _fireCooldown;
     }
 
     void UpdateFacing()
