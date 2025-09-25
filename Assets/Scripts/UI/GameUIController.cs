@@ -44,6 +44,9 @@ public class GameUIController : MonoBehaviour
     float _rootTargetAlpha;
     float _blackoutTargetAlpha;
     float _healthBarVisibility;
+    EnemySpawner _enemySpawner;
+    float _enemySpawnerRefreshTimer;
+    [SerializeField, Min(0f)] float _enemySpawnerRefreshInterval = 1f;
 
     void Awake()
     {
@@ -76,11 +79,13 @@ public class GameUIController : MonoBehaviour
         UpdatePhaseLabel();
         UpdateHealthBarVisibility(0f);
         UpdateHealthBars();
+        RefreshEnemySpawner(true);
     }
 
     void OnEnable()
     {
         UpdateGameStateSubscription();
+        RefreshEnemySpawner(true);
         UpdatePhaseLabel();
         UpdateHealthBarVisibility(0f);
         UpdateHealthBars();
@@ -120,6 +125,7 @@ public class GameUIController : MonoBehaviour
     {
         UpdateGameStateSubscription();
         CachePlayers();
+        RefreshEnemySpawner();
         UpdatePhaseLabel();
         UpdateHealthBarVisibility(Time.deltaTime);
         UpdateHealthBars();
@@ -204,6 +210,25 @@ public class GameUIController : MonoBehaviour
         }
     }
 
+    void RefreshEnemySpawner(bool force = false)
+    {
+        if (!force)
+        {
+            _enemySpawnerRefreshTimer -= Time.deltaTime;
+            if (_enemySpawnerRefreshTimer > 0f)
+            {
+                return;
+            }
+        }
+
+        _enemySpawnerRefreshTimer = Mathf.Max(0.1f, _enemySpawnerRefreshInterval);
+
+        if (_enemySpawner == null || !_enemySpawner.isActiveAndEnabled)
+        {
+            _enemySpawner = FindFirstObjectByType<EnemySpawner>(FindObjectsInactive.Include);
+        }
+    }
+
     void UpdatePhaseLabel()
     {
         if (_phaseLabel == null)
@@ -221,7 +246,12 @@ public class GameUIController : MonoBehaviour
         if (currentPhase == GameStateController.GamePhase.Preparation)
         {
             int remaining = Mathf.CeilToInt(_gameState.PreparationTimeRemaining);
-            _phaseLabel.text = $"{currentPhase}: {Mathf.Max(0, remaining)}";
+            _phaseLabel.text = $"{Mathf.Max(0, remaining)}s until next wave";
+        }
+        else if (currentPhase == GameStateController.GamePhase.Combat)
+        {
+            int enemiesRemaining = _enemySpawner != null ? _enemySpawner.EnemiesRemaining : 0;
+            _phaseLabel.text = $"Round {_gameState.CurrentWave} - Enemies Remaining {enemiesRemaining}";
         }
         else
         {

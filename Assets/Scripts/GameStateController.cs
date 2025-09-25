@@ -66,6 +66,17 @@ public class GameStateController : MonoBehaviour
     [SerializeField] GameObject _pausePanel;
     [SerializeField] GameObject _hudPanel;
 
+    [Header("Wave Scaling")]
+    [SerializeField, Min(1)] int _baseEnemiesPerWave = 3;
+    [SerializeField, Min(0)] int _enemiesPerWaveGrowth = 2;
+    [SerializeField, Min(1)] int _maxEnemiesPerWave = 40;
+    [SerializeField, Min(1)] int _baseSimultaneousEnemies = 3;
+    [SerializeField, Min(0)] int _simultaneousEnemiesGrowth = 1;
+    [SerializeField, Min(1)] int _maxSimultaneousEnemies = 10;
+    [SerializeField, Min(0f)] float _baseSpawnInterval = 2f;
+    [SerializeField, Min(0f)] float _spawnIntervalDecay = 0.1f;
+    [SerializeField, Min(0.1f)] float _minSpawnInterval = 0.4f;
+
     readonly List<PlayerController> _players = new();
     readonly Dictionary<PlayerController, PlayerStats> _playerStats = new();
 
@@ -85,6 +96,9 @@ public class GameStateController : MonoBehaviour
     public IEnumerable<PlayerStats> PlayerStatistics => _playerStats.Values;
     public float PreparationDuration => _preparationDuration;
     public float PreparationTimeRemaining => Mathf.Max(0f, _preparationTimeRemaining);
+    public int TotalEnemiesThisWave { get; private set; }
+    public int MaxSimultaneousEnemiesThisWave { get; private set; }
+    public float SpawnIntervalThisWave { get; private set; }
 
 
     void Awake()
@@ -99,6 +113,7 @@ public class GameStateController : MonoBehaviour
         Instance = this;
 
         _currentWave = Mathf.Max(1, _startingWave);
+        CalculateWaveMetrics();
         Time.timeScale = 1f;
         RefreshPlayers();
         InitializePausePanel();
@@ -179,6 +194,7 @@ public class GameStateController : MonoBehaviour
             _hasStartedCombat = true;
         }
 
+        CalculateWaveMetrics();
         SetPhase(GamePhase.Combat);
         Debug.Log($"[GameState] Wave {_currentWave} started.", this);
         WaveStarted?.Invoke(_currentWave);
@@ -339,6 +355,15 @@ public class GameStateController : MonoBehaviour
         PhaseChanged?.Invoke(_currentPhase);
     }
 
+    void CalculateWaveMetrics()
+    {
+        int waveIndex = Mathf.Max(0, _currentWave - 1);
+        TotalEnemiesThisWave = Mathf.Clamp(_baseEnemiesPerWave + _enemiesPerWaveGrowth * waveIndex, 1, _maxEnemiesPerWave);
+        MaxSimultaneousEnemiesThisWave = Mathf.Clamp(_baseSimultaneousEnemies + _simultaneousEnemiesGrowth * waveIndex, 1, _maxSimultaneousEnemies);
+        float interval = _baseSpawnInterval - _spawnIntervalDecay * waveIndex;
+        SpawnIntervalThisWave = Mathf.Clamp(interval, _minSpawnInterval, float.MaxValue);
+    }
+
     void ApplyPhaseSideEffects(GamePhase previousPhase, GamePhase newPhase)
     {
         if (newPhase == GamePhase.Paused)
@@ -473,3 +498,4 @@ public class GameStateController : MonoBehaviour
         SceneManager.LoadScene("End Scene");
     }
 }
+

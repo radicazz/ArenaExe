@@ -11,7 +11,7 @@ public class HealthPickupSpawner : MonoBehaviour
         "Player 1",
         "Player 2",
         "Enemy",
-        "pickup Health"
+        "Pickup Health"
     };
 
     [Header("Pickup")]

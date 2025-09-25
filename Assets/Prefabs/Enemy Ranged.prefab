@@ -109,12 +109,12 @@ MonoBehaviour:
   _lineOfSightMask:
     serializedVersion: 2
     m_Bits: 256
-  _moveSpeed: 5
-  _acceleration: 12
+  _moveSpeed: 8
+  _acceleration: 14
   _stopTolerance: 0.35
   _avoidanceRadius: 1.5
   _avoidanceStrength: 2.5
-  _baseHoverHeight: 1.4
+  _baseHoverHeight: 2
   _hoverMoveBoost: 0.6
   _hoverBobAmplitude: 0.2
   _hoverBobFrequency: 1.4
