@@ -109,8 +109,8 @@ MonoBehaviour:
   _lineOfSightMask:
     serializedVersion: 2
     m_Bits: 256
-  _maxHealth: 50
-  _currentHealth: 50
+  _maxHealth: 150
+  _currentHealth: 150
   _moveSpeed: 10
   _acceleration: 15
   _stopTolerance: 0.35

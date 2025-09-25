@@ -23,11 +23,17 @@ public class PlayerController : MonoBehaviour
     [Header("Weapon")]
     [SerializeField] Transform _barrel;
     [SerializeField] GameObject _projectilePrefab;
-    [SerializeField, Min(0f)] float _fireRange = 20f;
     [SerializeField, Min(0.05f)] float _fireCooldown = 0.35f;
     [SerializeField, Min(0)] int _maxAmmo = 12;
     [SerializeField, Min(0)] int _startingAmmo = 12;
     [SerializeField] LayerMask _fireLineOfSightMask = ~0;
+
+    [Header("Audio")]
+    [SerializeField] AudioClip _fireClip;
+    [SerializeField, Range(0f, 1f)] float _fireVolume = 1f;
+    [SerializeField] AudioClip _playerOneDamageClip;
+    [SerializeField] AudioClip _playerTwoDamageClip;
+    [SerializeField, Range(0f, 1f)] float _damageVolume = 1f;
 
     Transform _closestEnemy;
     float _enemyRefreshTimer;
@@ -201,6 +207,21 @@ public class PlayerController : MonoBehaviour
 
         Debug.Log($"[PlayerController] {gameObject.name} took {damage} damage.", this);
 
+        AudioClip damageClip = null;
+        if (CompareTag("Player 1"))
+        {
+            damageClip = _playerOneDamageClip;
+        }
+        else if (CompareTag("Player 2"))
+        {
+            damageClip = _playerTwoDamageClip;
+        }
+
+        if (damageClip != null)
+        {
+            AudioSource.PlayClipAtPoint(damageClip, transform.position, Mathf.Clamp01(_damageVolume));
+        }
+
         _currentHealth = Mathf.Clamp(_currentHealth - damage, 0f, _maxHealth);
         GameStateController.Instance?.RecordDamageTaken(this, damage);
 
@@ -251,11 +272,6 @@ public class PlayerController : MonoBehaviour
         }
 
         Vector3 targetPosition = target.position + Vector3.up * 0.4f;
-        Vector3 toTarget = targetPosition - transform.position;
-        if (toTarget.sqrMagnitude > _fireRange * _fireRange)
-        {
-            return;
-        }
 
         if (!HasLineOfSight(target, targetPosition))
         {
@@ -321,8 +337,24 @@ public class PlayerController : MonoBehaviour
 
         Quaternion rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
         Instantiate(_projectilePrefab, _barrel.position, rotation);
+
+        if (_fireClip != null)
+        {
+            Vector3 audioPosition = _barrel != null ? _barrel.position : transform.position;
+            AudioSource.PlayClipAtPoint(_fireClip, audioPosition, Mathf.Clamp01(_fireVolume));
+        }
+
         _currentAmmo = Mathf.Max(0, _currentAmmo - 1);
         _fireTimer = _fireCooldown;
+    }
+
+    public void SetAmmoForWave(int ammoAmount)
+    {
+        int ammo = Mathf.Max(0, ammoAmount);
+        _maxAmmo = Mathf.Max(ammo, _maxAmmo);
+        _startingAmmo = ammo;
+        _currentAmmo = ammo;
+        _fireTimer = 0f;
     }
 
     void UpdateFacing()

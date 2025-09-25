@@ -25,6 +25,12 @@ public class EnemySpawner : MonoBehaviour
     Coroutine _spawnRoutine;
     WaitForSeconds _spawnDelay;
 
+    int _waveNumber;
+    float _enemyHealthMultiplier = 1f;
+    float _enemySpeedMultiplier = 1f;
+    float _enemyRangeMultiplier = 1f;
+    float _enemyDamageMultiplier = 1f;
+
     void OnEnable()
     {
         _bindRoutine = StartCoroutine(BindGameStateWhenReady());
@@ -119,6 +125,11 @@ public class EnemySpawner : MonoBehaviour
         _maxConcurrentEnemies = Mathf.Max(1, _gameState.MaxSimultaneousEnemiesThisWave);
         float interval = Mathf.Max(0.05f, _gameState.SpawnIntervalThisWave);
         _spawnDelay = new WaitForSeconds(interval);
+        _waveNumber = Mathf.Max(1, _gameState.CurrentWave);
+        _enemyHealthMultiplier = Mathf.Max(0.01f, _gameState.EnemyHealthMultiplierThisWave);
+        _enemySpeedMultiplier = Mathf.Max(0.01f, _gameState.EnemySpeedMultiplierThisWave);
+        _enemyRangeMultiplier = Mathf.Max(0.01f, _gameState.EnemyRangeMultiplierThisWave);
+        _enemyDamageMultiplier = Mathf.Max(0.01f, _gameState.EnemyDamageMultiplierThisWave);
 
         Log($"Configured wave | pending={_pendingSpawns}, maxActive={_maxConcurrentEnemies}, interval={interval:F2}");
     }
@@ -129,6 +140,11 @@ public class EnemySpawner : MonoBehaviour
         _pendingSpawns = 0;
         _activeEnemies = 0;
         _maxConcurrentEnemies = 0;
+        _waveNumber = 0;
+        _enemyHealthMultiplier = 1f;
+        _enemySpeedMultiplier = 1f;
+        _enemyRangeMultiplier = 1f;
+        _enemyDamageMultiplier = 1f;
         CleanupDestroyedEnemies(true);
     }
 
@@ -231,6 +247,16 @@ public class EnemySpawner : MonoBehaviour
         _activeEnemies++;
         _pendingSpawns = Mathf.Max(0, _pendingSpawns - 1);
         Log($"Spawned '{prefab.name}' at {spawnPoint.position}. Active={_activeEnemies} Pending={_pendingSpawns}");
+
+        if (enemy != null)
+        {
+            IWaveScalableEnemy scalableEnemy = enemy.GetComponent<IWaveScalableEnemy>();
+            if (scalableEnemy != null)
+            {
+                int wave = _waveNumber > 0 ? _waveNumber : (_gameState != null ? _gameState.CurrentWave : 1);
+                scalableEnemy.ApplyWaveScaling(wave, _enemyHealthMultiplier, _enemySpeedMultiplier, _enemyRangeMultiplier, _enemyDamageMultiplier);
+            }
+        }
 
         EnemyWatcher watcher = enemy.AddComponent<EnemyWatcher>();
         watcher.Initialize(this, enemy);

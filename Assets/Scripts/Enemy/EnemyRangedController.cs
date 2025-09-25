@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class EnemyRangedController : MonoBehaviour
+public class EnemyRangedController : MonoBehaviour, IWaveScalableEnemy
 {
     [Header("References")]
     [SerializeField] Transform _leftBarrel;
@@ -42,6 +42,12 @@ public class EnemyRangedController : MonoBehaviour
     float _initialHeight;
     bool _isDead;
 
+    float _baseMaxHealth;
+    float _baseMoveSpeed;
+    float _baseFireRange;
+    float _projectileDamageMultiplier = 1f;
+    int _activeWaveNumber = 1;
+
     void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
@@ -51,11 +57,18 @@ public class EnemyRangedController : MonoBehaviour
         _selfColliders = GetComponentsInChildren<Collider>();
         _initialHeight = transform.position.y;
         _maxHealth = Mathf.Max(1f, _maxHealth);
+        _moveSpeed = Mathf.Max(0f, _moveSpeed);
+        _fireRange = Mathf.Max(0f, _fireRange);
+        _baseMaxHealth = _maxHealth;
+        _baseMoveSpeed = _moveSpeed;
+        _baseFireRange = _fireRange;
         _currentHealth = Mathf.Clamp(_currentHealth, 0f, _maxHealth);
         if (_currentHealth <= 0f)
         {
             _currentHealth = _maxHealth;
         }
+        _projectileDamageMultiplier = 1f;
+        _activeWaveNumber = Mathf.Max(1, _activeWaveNumber);
         _isDead = false;
     }
 
@@ -224,6 +237,21 @@ public class EnemyRangedController : MonoBehaviour
         return _initialHeight + _baseHoverHeight + heightOffset + bob;
     }
 
+    public void ApplyWaveScaling(int waveNumber, float healthMultiplier, float speedMultiplier, float rangeMultiplier, float damageMultiplier)
+    {
+        _activeWaveNumber = Mathf.Max(1, waveNumber);
+        float safeHealthMultiplier = Mathf.Max(0.01f, healthMultiplier);
+        float safeSpeedMultiplier = Mathf.Max(0.01f, speedMultiplier);
+        float safeRangeMultiplier = Mathf.Max(0.01f, rangeMultiplier);
+        float safeDamageMultiplier = Mathf.Max(0.01f, damageMultiplier);
+
+        _maxHealth = Mathf.Max(1f, _baseMaxHealth * safeHealthMultiplier);
+        _currentHealth = _maxHealth;
+        _moveSpeed = Mathf.Max(0f, _baseMoveSpeed * safeSpeedMultiplier);
+        _fireRange = Mathf.Max(0f, _baseFireRange * safeRangeMultiplier);
+        _projectileDamageMultiplier = safeDamageMultiplier;
+    }
+
     public void TakeDamage(float amount)
     {
         if (_isDead)
@@ -361,7 +389,19 @@ public class EnemyRangedController : MonoBehaviour
         }
 
         Quaternion rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
-        Destroy(Instantiate(_projectilePrefab, barrel.position, rotation), 5f);
+        GameObject projectileInstance = Instantiate(_projectilePrefab, barrel.position, rotation);
+        if (projectileInstance == null)
+        {
+            return;
+        }
+
+        EnemyProjectile projectile = projectileInstance.GetComponent<EnemyProjectile>();
+        if (projectile != null)
+        {
+            projectile.Configure(_projectileDamageMultiplier);
+        }
+
+        Destroy(projectileInstance, 5f);
     }
 
     void OnTriggerEnter(Collider other)

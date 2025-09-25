@@ -258,13 +258,17 @@ MonoBehaviour:
   _turnSpeedDegreesPerSecond: 540
   _barrel: {fileID: 3894170639655376169}
   _projectilePrefab: {fileID: 3310915183252703991, guid: 8cf4de7b551356347a7520ea80b660b2, type: 3}
-  _fireRange: 20
   _fireCooldown: 0.35
   _maxAmmo: 12
   _startingAmmo: 12
   _fireLineOfSightMask:
     serializedVersion: 2
     m_Bits: 4294967295
+  _fireClip: {fileID: 8300000, guid: e257ef6ad0d250040a061bf704140db3, type: 3}
+  _fireVolume: 0.463
+  _playerOneDamageClip: {fileID: 8300000, guid: 0a4eec81a7646bf45bf6533a14b4df3f, type: 3}
+  _playerTwoDamageClip: {fileID: 8300000, guid: 8e72d5cdb44b2424db113fbe759b749f, type: 3}
+  _damageVolume: 0.706
 --- !u!1001 &2733437327285239593
 PrefabInstance:
   m_ObjectHideFlags: 0

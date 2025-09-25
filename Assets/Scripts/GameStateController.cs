@@ -77,6 +77,12 @@ public class GameStateController : MonoBehaviour
     [SerializeField, Min(0f)] float _spawnIntervalDecay = 0.1f;
     [SerializeField, Min(0.1f)] float _minSpawnInterval = 0.4f;
 
+    [Header("Enemy Stat Scaling")]
+    [SerializeField, Min(0f)] float _enemyHealthMultiplierGrowth = 0.15f;
+    [SerializeField, Min(0f)] float _enemySpeedMultiplierGrowth = 0.05f;
+    [SerializeField, Min(0f)] float _enemyRangeMultiplierGrowth = 0.1f;
+    [SerializeField, Min(0f)] float _enemyDamageMultiplierGrowth = 0.12f;
+
     readonly List<PlayerController> _players = new();
     readonly Dictionary<PlayerController, PlayerStats> _playerStats = new();
 
@@ -100,6 +106,11 @@ public class GameStateController : MonoBehaviour
     public int MaxSimultaneousEnemiesThisWave { get; private set; }
     public float SpawnIntervalThisWave { get; private set; }
 
+
+    public float EnemyHealthMultiplierThisWave { get; private set; } = 1f;
+    public float EnemySpeedMultiplierThisWave { get; private set; } = 1f;
+    public float EnemyRangeMultiplierThisWave { get; private set; } = 1f;
+    public float EnemyDamageMultiplierThisWave { get; private set; } = 1f;
 
     void Awake()
     {
@@ -195,6 +206,7 @@ public class GameStateController : MonoBehaviour
         }
 
         CalculateWaveMetrics();
+        RefillPlayersAmmoForWave();
         SetPhase(GamePhase.Combat);
         Debug.Log($"[GameState] Wave {_currentWave} started.", this);
         WaveStarted?.Invoke(_currentWave);
@@ -260,6 +272,20 @@ public class GameStateController : MonoBehaviour
         }
 
         _preparationTimerRoutine = StartCoroutine(PreparationCountdown());
+    }
+
+    void RefillPlayersAmmoForWave()
+    {
+        int ammoPerPlayer = Mathf.Max(0, TotalEnemiesThisWave * 5);
+        foreach (PlayerController player in _players)
+        {
+            if (player == null)
+            {
+                continue;
+            }
+
+            player.SetAmmoForWave(ammoPerPlayer);
+        }
     }
 
     public void RegisterPlayer(PlayerController player)
@@ -362,6 +388,20 @@ public class GameStateController : MonoBehaviour
         MaxSimultaneousEnemiesThisWave = Mathf.Clamp(_baseSimultaneousEnemies + _simultaneousEnemiesGrowth * waveIndex, 1, _maxSimultaneousEnemies);
         float interval = _baseSpawnInterval - _spawnIntervalDecay * waveIndex;
         SpawnIntervalThisWave = Mathf.Clamp(interval, _minSpawnInterval, float.MaxValue);
+        EnemyHealthMultiplierThisWave = CalculateStatMultiplier(waveIndex, _enemyHealthMultiplierGrowth);
+        EnemySpeedMultiplierThisWave = CalculateStatMultiplier(waveIndex, _enemySpeedMultiplierGrowth);
+        EnemyRangeMultiplierThisWave = CalculateStatMultiplier(waveIndex, _enemyRangeMultiplierGrowth);
+        EnemyDamageMultiplierThisWave = CalculateStatMultiplier(waveIndex, _enemyDamageMultiplierGrowth);
+    }
+
+    static float CalculateStatMultiplier(int waveIndex, float growthPerWave)
+    {
+        if (waveIndex <= 0 || growthPerWave <= 0f)
+        {
+            return 1f;
+        }
+
+        return 1f + growthPerWave * waveIndex;
     }
 
     void ApplyPhaseSideEffects(GamePhase previousPhase, GamePhase newPhase)

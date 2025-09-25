@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6228060410539207044}
   m_Layer: 0
-  m_Name: Assualt Rifle
+  m_Name: Weapon Rifle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

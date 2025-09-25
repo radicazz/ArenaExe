@@ -543,6 +543,10 @@ MonoBehaviour:
   _baseSpawnInterval: 5
   _spawnIntervalDecay: 0.1
   _minSpawnInterval: 1
+  _enemyHealthMultiplierGrowth: 0.15
+  _enemySpeedMultiplierGrowth: 0.05
+  _enemyRangeMultiplierGrowth: 0.1
+  _enemyDamageMultiplierGrowth: 0.12
 --- !u!114 &69093820
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12411,8 +12415,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 45
-  m_fontSizeBase: 45
+  m_fontSize: 40
+  m_fontSizeBase: 40
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
