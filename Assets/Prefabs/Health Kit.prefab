@@ -172,6 +172,8 @@ MonoBehaviour:
   _rotationSpeed: 50
   _bobAmplitude: 0.2
   _bobFrequency: 1.1
+  _collectClip: {fileID: 8300000, guid: 21f7256b41942dc418b2bb8e344abb9d, type: 3}
+  _collectVolume: 1
 --- !u!136 &2605115302237160858
 CapsuleCollider:
   m_ObjectHideFlags: 0

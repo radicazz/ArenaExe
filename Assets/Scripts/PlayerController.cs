@@ -38,6 +38,7 @@ public class PlayerController : MonoBehaviour
     public float CurrentHealth => _currentHealth;
     public float MaxHealth => _maxHealth;
     public bool IsAlive => _currentHealth > 0f;
+    public int CurrentAmmo => _currentAmmo;
 
     void Awake()
     {
@@ -268,15 +269,17 @@ public class PlayerController : MonoBehaviour
     {
         if (CompareTag("Player 1"))
         {
-            return Input.GetKeyDown(KeyCode.Space);
+            return Input.GetKeyDown(KeyCode.F);
         }
 
         if (CompareTag("Player 2"))
         {
-            return Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.RightControl);
+            return Input.GetKeyDown(KeyCode.K);
         }
 
-        return Input.GetKeyDown(KeyCode.Space);
+        Debug.LogError("[PlayerController] Unrecognized player tag for firing input.", this);
+
+        return false;
     }
 
     bool HasLineOfSight(Transform target, Vector3 targetPosition)

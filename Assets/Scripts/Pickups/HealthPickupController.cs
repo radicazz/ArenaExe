@@ -26,6 +26,10 @@ public class HealthPickupController : MonoBehaviour
     [SerializeField, Min(0f)] float _bobAmplitude = 0.35f;
     [SerializeField, Min(0f)] float _bobFrequency = 1.1f;
 
+    [Header("Audio")]
+    [SerializeField] AudioClip _collectClip;
+    [SerializeField, Range(0f, 1f)] float _collectVolume = 1f;
+
     Vector3 _initialWorldPosition;
     Vector3 _initialLocalPosition;
     bool _collected;
@@ -81,6 +85,11 @@ public class HealthPickupController : MonoBehaviour
         }
 
         _collected = true;
+        if (_collectClip != null)
+        {
+            AudioSource.PlayClipAtPoint(_collectClip, transform.position, Mathf.Clamp01(_collectVolume));
+        }
+
         HealthGranted?.Invoke(this, new HealthGrantedEventArgs(player, _healAmount));
         Destroy(gameObject);
     }

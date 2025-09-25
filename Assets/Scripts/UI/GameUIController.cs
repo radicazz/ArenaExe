@@ -16,10 +16,12 @@ public class GameUIController : MonoBehaviour
     [Header("Player One UI")]
     [SerializeField] CanvasGroup _playerOneGroup;
     [SerializeField] RectTransform _playerOneFill;
+    [SerializeField] TMP_Text _playerOneAmmoText;
 
     [Header("Player Two UI")]
     [SerializeField] CanvasGroup _playerTwoGroup;
     [SerializeField] RectTransform _playerTwoFill;
+    [SerializeField] TMP_Text _playerTwoAmmoText;
 
     [Header("Root Fade")]
     [SerializeField] CanvasGroup _rootGroup;
@@ -89,6 +91,7 @@ public class GameUIController : MonoBehaviour
         UpdatePhaseLabel();
         UpdateHealthBarVisibility(0f);
         UpdateHealthBars();
+        UpdateAmmoTexts();
         EvaluateFade();
     }
 
@@ -129,6 +132,7 @@ public class GameUIController : MonoBehaviour
         UpdatePhaseLabel();
         UpdateHealthBarVisibility(Time.deltaTime);
         UpdateHealthBars();
+        UpdateAmmoTexts();
         EvaluateFade();
     }
 
@@ -304,6 +308,33 @@ public class GameUIController : MonoBehaviour
     {
         UpdateHealthBar(_playerOneGroup, _playerOneFill, _playerOne, _playerOneBaseScale, _healthBarVisibility);
         UpdateHealthBar(_playerTwoGroup, _playerTwoFill, _playerTwo, _playerTwoBaseScale, _healthBarVisibility);
+    }
+
+    void UpdateAmmoTexts()
+    {
+        if (_playerOneAmmoText != null)
+        {
+            if (_playerOne != null && _playerOne.isActiveAndEnabled)
+            {
+                _playerOneAmmoText.text = _playerOne.CurrentAmmo.ToString();
+            }
+            else
+            {
+                _playerOneAmmoText.text = string.Empty;
+            }
+        }
+
+        if (_playerTwoAmmoText != null)
+        {
+            if (_playerTwo != null && _playerTwo.isActiveAndEnabled)
+            {
+                _playerTwoAmmoText.text = _playerTwo.CurrentAmmo.ToString();
+            }
+            else
+            {
+                _playerTwoAmmoText.text = string.Empty;
+            }
+        }
     }
 
     void EvaluateFade()
