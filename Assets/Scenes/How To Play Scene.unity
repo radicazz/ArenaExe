@@ -325,16 +325,14 @@ MonoBehaviour:
       m_Calls: []
   m_text: "- Use WASD to control player 1\n- Use the arrow keys to control player
     2\n- Press 'F' to shoot player 1's weapon\n- Press 'K' to fire player 2's weapon\n-
-    Each player can take 5 hits before being knocked down, if a player is knocked
-    down it is up to the other player to survive until the other player respawns.
-    If both players are knocked down the game ends. \n- Throughout the game pickups
-    will spawn these pickups will either be health or weapons. Picking up a health
-    pickup will restore one bar of health to the player character. Weapons which
-    the player can pick up are more powerful than the starter pistol however come
-    at the cost of having limited ammunition. \n- The goal of the game is to survive
-    as long as you can against increasingly more difficult odds, the longer a player
-    survives the harder the waves becoming. Waves of enemies becoming much larger
-    allowing for more vvariety in enemy type.      "
+    Each player can take 4 hits before being knocked down, if a player is knocked
+    down it is up to the other player to survive for as long as they can. If both
+    players are knocked down the game ends. \n- Throughout the game health pickups
+    will spawn allowing for players to regain one block of health.  \n- The goal
+    of the game is to survive as long as you can against increasingly more difficult
+    odds, the longer a player survives the harder the waves becoming. \n- The players
+    pistol has limited ammunition once it finishes you're done! The ammo replenishes
+    after each round completed so make your shots count   "
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4b775fd2e279fd04a962470b83154b52, type: 2}
   m_sharedMaterial: {fileID: -7489765113027175155, guid: 4b775fd2e279fd04a962470b83154b52, type: 2}
