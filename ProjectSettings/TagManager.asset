@@ -9,6 +9,8 @@ TagManager:
   - Player 2
   - Pickup Health
   - Projectile Enemy
+  - Spawn Area
+  - Enemy
   layers:
   - Default
   - TransparentFX

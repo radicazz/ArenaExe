@@ -286,6 +286,10 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Arena
       objectReference: {fileID: 0}
+    - target: {fileID: -4327692287827914614, guid: ab0281e027d976b4dafa8633d41b6f51, type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: -3866001026286363724, guid: ab0281e027d976b4dafa8633d41b6f51, type: 3}
       propertyPath: m_TagString
       value: Arena

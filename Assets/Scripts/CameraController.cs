@@ -35,6 +35,8 @@ public class CameraController : MonoBehaviour
     float _flyInTimer;
     bool _flyInComplete;
 
+    bool _preparationPhaseTriggered;
+
     float _pitchVelocity;
     float _yawVelocity;
     float _zoomVelocity;
@@ -92,6 +94,7 @@ public class CameraController : MonoBehaviour
             _camera.orthographicSize = desiredSize;
             _staticPosition = desiredPosition;
             _flyInComplete = true;
+            TriggerPreparationPhaseIfReady();
             return;
         }
 
@@ -111,6 +114,7 @@ public class CameraController : MonoBehaviour
             _zoomVelocity = 0f;
             _staticPosition = desiredPosition;
             transform.SetPositionAndRotation(desiredPosition, targetRotation);
+            TriggerPreparationPhaseIfReady();
         }
     }
 
@@ -124,6 +128,27 @@ public class CameraController : MonoBehaviour
         transform.rotation = Quaternion.Euler(currentPitch, currentYaw, _initialRoll);
 
         _camera.orthographicSize = Mathf.SmoothDamp(_camera.orthographicSize, desiredSize, ref _zoomVelocity, _zoomSmoothTime);
+    }
+
+    void TriggerPreparationPhaseIfReady()
+    {
+        if (_preparationPhaseTriggered)
+        {
+            return;
+        }
+
+        GameStateController state = GameStateController.Instance;
+        if (state == null)
+        {
+            return;
+        }
+
+        if (state.CurrentPhase == GameStateController.GamePhase.Intro)
+        {
+            state.BeginPreparationPhase();
+        }
+
+        _preparationPhaseTriggered = true;
     }
 
     Vector3 CalculateDesiredPosition(Vector3 focusPoint, Quaternion yawRotation, float distanceFactor)

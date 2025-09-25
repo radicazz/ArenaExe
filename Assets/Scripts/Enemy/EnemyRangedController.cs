@@ -36,7 +36,7 @@ public class EnemyRangedController : MonoBehaviour
 
     PlayerController FindClosestPlayer()
     {
-        IReadOnlyList<PlayerController> players = GameState.Instance?.Players;
+        IReadOnlyList<PlayerController> players = GameStateController.Instance?.Players;
         if (players == null)
         {
             return null;
@@ -132,3 +132,4 @@ public class EnemyRangedController : MonoBehaviour
         Destroy(Instantiate(_projectilePrefab, barrel.position, rotation), 5);
     }
 }
+

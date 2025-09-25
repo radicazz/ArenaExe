@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -14,12 +13,13 @@ public class PlayerController : MonoBehaviour
 
     [Header("Health")]
     [SerializeField, Min(1f)] float _maxHealth = 100f;
-    [SerializeField, Min(0f)] float _startingHealth = 100f;
+    [SerializeField, Min(1f)] float _currentHealth = 100f;
+
+    [SerializeField] Light _spotLight;
 
     [Header("Orientation")]
     [SerializeField, Min(0f)] float _turnSpeedDegreesPerSecond = 540f;
 
-    float _currentHealth;
     Transform _closestEnemy;
     float _enemyRefreshTimer;
     Quaternion _movementFrame;
@@ -36,7 +36,7 @@ public class PlayerController : MonoBehaviour
         _animator = GetComponentInChildren<Animator>();
 
         _movementInput = Vector2.zero;
-        _currentHealth = Mathf.Clamp(_startingHealth, 0f, _maxHealth);
+        _currentHealth = Mathf.Clamp(_currentHealth, 0f, _maxHealth);
 
         Vector3 planarForward = transform.forward;
         planarForward.y = 0f;
@@ -51,13 +51,13 @@ public class PlayerController : MonoBehaviour
     void OnEnable()
     {
         HealthPickupController.HealthGranted += HandleHealthGranted;
-        GameState.Instance?.RegisterPlayer(this);
+        GameStateController.Instance?.RegisterPlayer(this);
     }
 
     void OnDisable()
     {
         HealthPickupController.HealthGranted -= HandleHealthGranted;
-        GameState.Instance?.UnregisterPlayer(this);
+        GameStateController.Instance?.UnregisterPlayer(this);
     }
 
     void Update()
@@ -68,25 +68,36 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (CompareTag("Player 1"))
+        GameStateController state = GameStateController.Instance;
+        GameStateController.GamePhase phase = state != null ? state.CurrentPhase : GameStateController.GamePhase.Intro;
+        bool canMove = phase == GameStateController.GamePhase.Preparation || phase == GameStateController.GamePhase.Combat;
+
+        if (canMove)
         {
-            float x = 0f;
-            if (Input.GetKey(KeyCode.D)) x += 1f;
-            if (Input.GetKey(KeyCode.A)) x -= 1f;
-            float y = 0f;
-            if (Input.GetKey(KeyCode.W)) y += 1f;
-            if (Input.GetKey(KeyCode.S)) y -= 1f;
-            _movementInput = new Vector2(x, y);
-        }
-        else if (CompareTag("Player 2"))
-        {
-            float x = 0f;
-            if (Input.GetKey(KeyCode.RightArrow)) x += 1f;
-            if (Input.GetKey(KeyCode.LeftArrow)) x -= 1f;
-            float y = 0f;
-            if (Input.GetKey(KeyCode.UpArrow)) y += 1f;
-            if (Input.GetKey(KeyCode.DownArrow)) y -= 1f;
-            _movementInput = new Vector2(x, y);
+            if (CompareTag("Player 1"))
+            {
+                float x = 0f;
+                if (Input.GetKey(KeyCode.D)) x += 1f;
+                if (Input.GetKey(KeyCode.A)) x -= 1f;
+                float y = 0f;
+                if (Input.GetKey(KeyCode.W)) y += 1f;
+                if (Input.GetKey(KeyCode.S)) y -= 1f;
+                _movementInput = new Vector2(x, y);
+            }
+            else if (CompareTag("Player 2"))
+            {
+                float x = 0f;
+                if (Input.GetKey(KeyCode.RightArrow)) x += 1f;
+                if (Input.GetKey(KeyCode.LeftArrow)) x -= 1f;
+                float y = 0f;
+                if (Input.GetKey(KeyCode.UpArrow)) y += 1f;
+                if (Input.GetKey(KeyCode.DownArrow)) y -= 1f;
+                _movementInput = new Vector2(x, y);
+            }
+            else
+            {
+                _movementInput = Vector2.zero;
+            }
         }
         else
         {
@@ -136,7 +147,7 @@ public class PlayerController : MonoBehaviour
         }
 
         AddHealth(e.HealAmount);
-        GameState.Instance?.RecordHealthPickupUsed(this);
+        GameStateController.Instance?.RecordHealthPickupUsed(this);
     }
 
     void OnTriggerEnter(Collider other)
@@ -170,13 +181,15 @@ public class PlayerController : MonoBehaviour
         Debug.Log($"[PlayerController] {gameObject.name} took {damage} damage.", this);
 
         _currentHealth = Mathf.Clamp(_currentHealth - damage, 0f, _maxHealth);
-        GameState.Instance?.RecordDamageTaken(this, damage);
+        GameStateController.Instance?.RecordDamageTaken(this, damage);
 
         if (!IsAlive)
         {
             _rigidbody.linearVelocity = Vector3.zero;
             _movementInput = Vector2.zero;
             _animator.SetInteger("move", 2);
+            _spotLight.GetComponent<Light>().range = 0f;
+            Debug.Log($"[PlayerController] {gameObject.name} has died.", this);
         }
     }
 

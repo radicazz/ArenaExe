@@ -3,9 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
-public class GameState : MonoBehaviour
+public class GameStateController : MonoBehaviour
 {
     public enum GamePhase
     {
@@ -53,16 +52,16 @@ public class GameState : MonoBehaviour
         }
     }
 
-    public static GameState Instance { get; private set; }
+    public static GameStateController Instance { get; private set; }
 
     public event Action<GamePhase> PhaseChanged;
     public event Action<int> WaveStarted;
     public event Action<int> WaveCompleted;
     [SerializeField, Min(1)] int _startingWave = 1;
     [SerializeField, Min(0f)] float _endSceneDelay = 3f;
-    [Header("Fade")]
-    [SerializeField] Image _fadeImage;
-    [SerializeField, Min(0.01f)] float _fadeDuration = 1.5f;
+    [Header("Preparation")]
+    [SerializeField, Min(0f)] float _preparationDuration = 10f;
+
     [Header("Pause")]
     [SerializeField] GameObject _pausePanel;
     [SerializeField] GameObject _hudPanel;
@@ -74,16 +73,19 @@ public class GameState : MonoBehaviour
     int _currentWave;
     bool _gameEnded;
     Coroutine _endSceneRoutine;
-    Coroutine _fadeRoutine;
+    Coroutine _preparationTimerRoutine;
     GamePhase _phaseBeforePause = GamePhase.Intro;
+    bool _hasStartedCombat;
+    float _preparationTimeRemaining;
 
     public GamePhase CurrentPhase => _currentPhase;
     public bool IsPaused => _currentPhase == GamePhase.Paused;
     public int CurrentWave => _currentWave;
     public IReadOnlyList<PlayerController> Players => _players;
     public IEnumerable<PlayerStats> PlayerStatistics => _playerStats.Values;
+    public float PreparationDuration => _preparationDuration;
+    public float PreparationTimeRemaining => Mathf.Max(0f, _preparationTimeRemaining);
 
-    EnemySpawner _enemySpawner = null;
 
     void Awake()
     {
@@ -96,19 +98,9 @@ public class GameState : MonoBehaviour
 
         Instance = this;
 
-        if (_enemySpawner == null)
-        {
-            _enemySpawner = GetComponent<EnemySpawner>();
-            if (_enemySpawner == null)
-            {
-                Debug.LogWarning("GameState could not locate an EnemySpawner on the same GameObject.", this);
-            }
-        }
-
         _currentWave = Mathf.Max(1, _startingWave);
         Time.timeScale = 1f;
         RefreshPlayers();
-        InitializeFadeImage();
         InitializePausePanel();
     }
 
@@ -143,11 +135,7 @@ public class GameState : MonoBehaviour
             _endSceneRoutine = null;
         }
 
-        if (_fadeRoutine != null)
-        {
-            StopCoroutine(_fadeRoutine);
-            _fadeRoutine = null;
-        }
+        CancelPreparationTimer();
 
         Time.timeScale = 1f;
         if (Instance == this)
@@ -163,6 +151,9 @@ public class GameState : MonoBehaviour
             return;
         }
 
+        CancelPreparationTimer();
+        _hasStartedCombat = false;
+        _preparationTimeRemaining = 0f;
         SetPhase(GamePhase.Intro);
     }
 
@@ -173,15 +164,24 @@ public class GameState : MonoBehaviour
             return;
         }
 
-        if (_currentPhase == GamePhase.Preparation)
+        CancelPreparationTimer();
+
+        bool comingFromPreparation = _currentPhase == GamePhase.Preparation;
+        if (_hasStartedCombat)
         {
-            _currentWave++;
+            if (comingFromPreparation)
+            {
+                _currentWave++;
+            }
+        }
+        else
+        {
+            _hasStartedCombat = true;
         }
 
         SetPhase(GamePhase.Combat);
         Debug.Log($"[GameState] Wave {_currentWave} started.", this);
         WaveStarted?.Invoke(_currentWave);
-        _enemySpawner?.SpawnWave(_currentWave);
     }
 
     public void TogglePause()
@@ -230,9 +230,20 @@ public class GameState : MonoBehaviour
             return;
         }
 
+        CancelPreparationTimer();
         SetPhase(GamePhase.Preparation);
         Debug.Log($"[GameState] Wave {_currentWave} completed. Entering preparation phase.", this);
         WaveCompleted?.Invoke(_currentWave);
+
+        _preparationTimeRemaining = _preparationDuration;
+        if (_preparationDuration <= Mathf.Epsilon)
+        {
+            _preparationTimeRemaining = 0f;
+            BeginCombatPhase();
+            return;
+        }
+
+        _preparationTimerRoutine = StartCoroutine(PreparationCountdown());
     }
 
     public void RegisterPlayer(PlayerController player)
@@ -312,6 +323,17 @@ public class GameState : MonoBehaviour
 
         GamePhase previousPhase = _currentPhase;
         _currentPhase = newPhase;
+
+        if (previousPhase == GamePhase.Preparation && newPhase != GamePhase.Preparation && newPhase != GamePhase.Paused)
+        {
+            CancelPreparationTimer();
+        }
+
+        if (newPhase == GamePhase.Intro)
+        {
+            _hasStartedCombat = false;
+        }
+
         ApplyPhaseSideEffects(previousPhase, _currentPhase);
         Debug.Log($"[GameState] Phase change: {previousPhase} -> {_currentPhase}.", this);
         PhaseChanged?.Invoke(_currentPhase);
@@ -333,6 +355,40 @@ public class GameState : MonoBehaviour
             SetPausePanelVisible(false);
             SetHudVisible(true);
         }
+    }
+
+    IEnumerator PreparationCountdown()
+    {
+        float elapsed = 0f;
+
+        while (elapsed < _preparationDuration)
+        {
+            if (_currentPhase != GamePhase.Preparation && _currentPhase != GamePhase.Paused)
+            {
+                _preparationTimerRoutine = null;
+                _preparationTimeRemaining = 0f;
+                yield break;
+            }
+
+            yield return null;
+            elapsed += Time.deltaTime;
+            _preparationTimeRemaining = Mathf.Max(0f, _preparationDuration - elapsed);
+        }
+
+        _preparationTimerRoutine = null;
+        _preparationTimeRemaining = 0f;
+        BeginCombatPhase();
+    }
+
+    void CancelPreparationTimer()
+    {
+        if (_preparationTimerRoutine != null)
+        {
+            StopCoroutine(_preparationTimerRoutine);
+            _preparationTimerRoutine = null;
+        }
+
+        _preparationTimeRemaining = 0f;
     }
 
     void InitializePausePanel()
@@ -361,18 +417,6 @@ public class GameState : MonoBehaviour
         _hudPanel.SetActive(visible);
     }
 
-    void InitializeFadeImage()
-    {
-        if (_fadeImage == null)
-        {
-            return;
-        }
-
-        Color color = _fadeImage.color;
-        color.a = (_currentPhase == GamePhase.GameOver) ? 1f : 0f;
-        _fadeImage.color = color;
-        _fadeImage.raycastTarget = true;
-    }
 
     bool AreAllPlayersDead()
     {
@@ -407,7 +451,7 @@ public class GameState : MonoBehaviour
         SetPhase(GamePhase.GameOver);
         Debug.Log("[GameState] All players are dead. Game over.", this);
 
-        TriggerFadeToBlack();
+        GameUIController.Instance?.PlayGameOverFade(!gameObject.activeInHierarchy);
 
         if (!gameObject.activeInHierarchy)
         {
@@ -418,59 +462,6 @@ public class GameState : MonoBehaviour
         _endSceneRoutine = StartCoroutine(LoadEndSceneAfterDelay());
     }
 
-    void TriggerFadeToBlack()
-    {
-        if (_fadeImage == null)
-        {
-            return;
-        }
-
-        if (!gameObject.activeInHierarchy)
-        {
-            Color immediateColor = _fadeImage.color;
-            immediateColor.a = 1f;
-            _fadeImage.color = immediateColor;
-            return;
-        }
-
-        if (_fadeRoutine != null)
-        {
-            StopCoroutine(_fadeRoutine);
-        }
-
-        _fadeRoutine = StartCoroutine(FadeToBlack());
-    }
-
-    IEnumerator FadeToBlack()
-    {
-        if (_fadeImage == null)
-        {
-            yield break;
-        }
-
-        float elapsed = 0f;
-        Color startColor = _fadeImage.color;
-        Color targetColor = startColor;
-        targetColor.a = 1f;
-
-        if (_fadeDuration <= Mathf.Epsilon)
-        {
-            _fadeImage.color = targetColor;
-            _fadeRoutine = null;
-            yield break;
-        }
-
-        while (elapsed < _fadeDuration)
-        {
-            elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / _fadeDuration);
-            _fadeImage.color = Color.Lerp(startColor, targetColor, t);
-            yield return null;
-        }
-
-        _fadeImage.color = targetColor;
-        _fadeRoutine = null;
-    }
 
     IEnumerator LoadEndSceneAfterDelay()
     {

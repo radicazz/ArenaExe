@@ -25,13 +25,9 @@ public class HealthPickupController : MonoBehaviour
     [SerializeField, Min(0f)] float _rotationSpeed = 50f;
     [SerializeField, Min(0f)] float _bobAmplitude = 0.35f;
     [SerializeField, Min(0f)] float _bobFrequency = 1.1f;
-    [SerializeField] Light _auraLight;
-    [SerializeField, Min(0f)] float _auraPulseAmplitude = 0.25f;
-    [SerializeField, Min(0f)] float _auraPulseFrequency = 1.5f;
 
     Vector3 _initialWorldPosition;
     Vector3 _initialLocalPosition;
-    float _auraBaseIntensity;
     bool _collected;
 
     void Awake()
@@ -40,10 +36,6 @@ public class HealthPickupController : MonoBehaviour
         pickupCollider.isTrigger = true;
         _initialWorldPosition = transform.position;
         _initialLocalPosition = transform.localPosition;
-        if (_auraLight != null)
-        {
-            _auraBaseIntensity = _auraLight.intensity;
-        }
     }
 
     void Update()
@@ -68,12 +60,6 @@ public class HealthPickupController : MonoBehaviour
             localPosition.y += bobOffset;
             transform.localPosition = localPosition;
         }
-
-        if (_auraLight != null)
-        {
-            float pulse = 1f + _auraPulseAmplitude * Mathf.Sin(Time.time * _auraPulseFrequency);
-            _auraLight.intensity = _auraBaseIntensity * pulse;
-        }
     }
 
     void OnTriggerEnter(Collider other)
@@ -96,11 +82,6 @@ public class HealthPickupController : MonoBehaviour
 
         _collected = true;
         HealthGranted?.Invoke(this, new HealthGrantedEventArgs(player, _healAmount));
-
-        if (_auraLight != null)
-        {
-            _auraLight.enabled = false;
-        }
         Destroy(gameObject);
     }
 

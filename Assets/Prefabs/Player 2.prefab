@@ -32,8 +32,8 @@ Transform:
   m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 3025705327821636502}
   - {fileID: 8987099046918752711}
+  - {fileID: 3025705327821636502}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &1834858858548543973
@@ -101,6 +101,8 @@ MonoBehaviour:
   _moveSpeed: 7
   _maxHealth: 100
   _startingHealth: 100
+  _spotLight: {fileID: 2752699777960677083}
+  _turnSpeedDegreesPerSecond: 540
 --- !u!1 &8774313200463421536
 GameObject:
   m_ObjectHideFlags: 0
@@ -145,8 +147,8 @@ Light:
   serializedVersion: 11
   m_Type: 2
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 7.2
-  m_Range: 10
+  m_Intensity: 10
+  m_Range: 5
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -189,7 +191,7 @@ Light:
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
   m_ColorTemperature: 6633
-  m_UseColorTemperature: 1
+  m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1

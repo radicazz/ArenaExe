@@ -26,7 +26,7 @@ public class PauseMenuButtons : MonoBehaviour
 
     void ResumePausedState()
     {
-        GameState gameState = GameState.Instance;
+        GameStateController gameState = GameStateController.Instance;
         if (gameState != null)
         {
             if (gameState.IsPaused)
