@@ -12,10 +12,10 @@ GameObject:
   - component: {fileID: 9013905128743046403}
   - component: {fileID: 2744323967916481051}
   - component: {fileID: 836303575967078494}
-  - component: {fileID: 174158275230202669}
+  - component: {fileID: 1276671877535015993}
   m_Layer: 0
-  m_Name: Player Projecile
-  m_TagString: Projectile Enemy
+  m_Name: Player  1 Projecile
+  m_TagString: Projectile Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -101,7 +101,7 @@ SphereCollider:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 64
   m_LayerOverridePriority: 0
   m_IsTrigger: 1
   m_ProvidesContacts: 0
@@ -109,7 +109,7 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &174158275230202669
+--- !u!114 &1276671877535015993
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -118,8 +118,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 3310915183252703991}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1f8d210689d51e84d80f83bbed9f9d5d, type: 3}
+  m_Script: {fileID: 11500000, guid: e962787f19cf821479de5df2f43257f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _damage: 25
-  _speed: 30
+  _speed: 40
+  _lifetime: 3

@@ -84,8 +84,8 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.79
-  m_Height: 3.22
+  m_Radius: 1.79
+  m_Height: 3.88
   m_Direction: 1
   m_Center: {x: 0, y: 1.72, z: 0}
 --- !u!114 &4140374018304285765
@@ -109,13 +109,15 @@ MonoBehaviour:
   _lineOfSightMask:
     serializedVersion: 2
     m_Bits: 256
-  _moveSpeed: 8
-  _acceleration: 14
+  _maxHealth: 50
+  _currentHealth: 50
+  _moveSpeed: 10
+  _acceleration: 15
   _stopTolerance: 0.35
   _avoidanceRadius: 1.5
   _avoidanceStrength: 2.5
-  _baseHoverHeight: 2
-  _hoverMoveBoost: 0.6
+  _baseHoverHeight: 0
+  _hoverMoveBoost: 0.5
   _hoverBobAmplitude: 0.2
   _hoverBobFrequency: 1.4
 --- !u!1 &2077100712690609166
@@ -143,7 +145,7 @@ Transform:
   m_GameObject: {fileID: 2077100712690609166}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.621, y: 1.426, z: 0.768}
+  m_LocalPosition: {x: -0.621, y: 1.426, z: 1.044}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -174,7 +176,7 @@ Transform:
   m_GameObject: {fileID: 5171212009701572636}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.62, y: 1.426, z: 0.768}
+  m_LocalPosition: {x: 0.62, y: 1.426, z: 1.044}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

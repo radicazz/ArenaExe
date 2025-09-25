@@ -15,6 +15,10 @@ public class EnemyRangedController : MonoBehaviour
     [SerializeField, Min(0f)] float _rangeMargin = 1.25f;
     [SerializeField] LayerMask _lineOfSightMask = ~0;
 
+    [Header("Health")]
+    [SerializeField, Min(1f)] float _maxHealth = 200f;
+    [SerializeField, Min(0f)] float _currentHealth = 200f;
+
     [Header("Movement")]
     [SerializeField, Min(0f)] float _moveSpeed = 5f;
     [SerializeField, Min(0f)] float _acceleration = 12f;
@@ -36,6 +40,7 @@ public class EnemyRangedController : MonoBehaviour
     Vector3 _currentVelocity;
     float _hoverPhase;
     float _initialHeight;
+    bool _isDead;
 
     void Awake()
     {
@@ -45,6 +50,13 @@ public class EnemyRangedController : MonoBehaviour
 
         _selfColliders = GetComponentsInChildren<Collider>();
         _initialHeight = transform.position.y;
+        _maxHealth = Mathf.Max(1f, _maxHealth);
+        _currentHealth = Mathf.Clamp(_currentHealth, 0f, _maxHealth);
+        if (_currentHealth <= 0f)
+        {
+            _currentHealth = _maxHealth;
+        }
+        _isDead = false;
     }
 
     void OnEnable()
@@ -52,10 +64,16 @@ public class EnemyRangedController : MonoBehaviour
         _fireTimer = _fireInterval;
         _flip = false;
         _currentVelocity = Vector3.zero;
+        _currentHealth = _maxHealth;
+        _isDead = false;
     }
 
     void Update()
     {
+        if (_isDead)
+        {
+            return;
+        }
         GameStateController state = GameStateController.Instance;
         GameStateController.GamePhase phase = state != null ? state.CurrentPhase : GameStateController.GamePhase.Intro;
         bool canEngage = phase == GameStateController.GamePhase.Combat;
@@ -206,6 +224,29 @@ public class EnemyRangedController : MonoBehaviour
         return _initialHeight + _baseHoverHeight + heightOffset + bob;
     }
 
+    public void TakeDamage(float amount)
+    {
+        if (_isDead)
+        {
+            return;
+        }
+
+        _currentHealth = Mathf.Clamp(_currentHealth - amount, 0f, _maxHealth);
+        Debug.Log($"[EnemyRangedController] {gameObject.name} took {amount} damage. Remaining {_currentHealth}.", this);
+
+        if (_currentHealth <= 0f)
+        {
+            Die();
+        }
+    }
+
+    void Die()
+    {
+        _isDead = true;
+        Debug.Log($"[EnemyRangedController] {gameObject.name} destroyed.", this);
+        Destroy(gameObject);
+    }
+
     void HandleShooting(PlayerController target, Vector3 targetPosition)
     {
         if (_projectilePrefab == null)
@@ -321,5 +362,19 @@ public class EnemyRangedController : MonoBehaviour
 
         Quaternion rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
         Destroy(Instantiate(_projectilePrefab, barrel.position, rotation), 5f);
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (!other.CompareTag("Projectile Player"))
+        {
+            return;
+        }
+
+        Debug.Log($"[EnemyRangedController] {gameObject.name} hit by player projectile.", this);
+
+        var playerProjectile = other.GetComponent<PlayerProjectile>();
+        TakeDamage(playerProjectile.Damage);
+        Destroy(other.gameObject);
     }
 }

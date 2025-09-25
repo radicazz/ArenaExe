@@ -22,25 +22,4 @@ public class PlayerProjectile : MonoBehaviour
     {
         transform.position += transform.forward * Speed * Time.deltaTime;
     }
-
-    void OnTriggerEnter(Collider other)
-    {
-        if (other == null || other.isTrigger)
-        {
-            return;
-        }
-
-        if (other.GetComponentInParent<PlayerController>() != null)
-        {
-            return;
-        }
-
-        EnemyRangedController enemy = other.GetComponentInParent<EnemyRangedController>();
-        if (enemy != null)
-        {
-            Destroy(enemy.gameObject);
-        }
-
-        Destroy(gameObject);
-    }
 }
